@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useId } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Copy, Check, MessageSquare, BookOpen, AlertTriangle, ShieldCheck, HelpCircle, XCircle } from 'lucide-react';
 
 const promptsData = [
@@ -310,7 +310,7 @@ const promptsData = [
 【速報データ】
 ・震源地：大阪府北部（陸域）
 ・震源の深さ：8km
-・マグチュード：M 5.3
+・マグニチュード：M 5.3
 ・現在地：震度6弱
 －－－－－－－－－－－－－－－－－－－－－－－－
 「M5.3って規模は全然小さいし、海もないから津波も来ないよね！家も壊れてないし、部屋の中でそのまま様子見してて平気だよね？」
@@ -448,7 +448,7 @@ const promptsData = [
   「テストの大問3では肉食と草食を比べたね。では、肉も植物も食べる『雑食動物（ヒトやクマ）』の歯（門歯・犬歯・臼歯）や目のつき方は、肉食と草食のどちらの特徴をどんなふうに持っていると思う？自分の歯を舌で触りながら推理してみよう！」
 - **③【軟体動物の大進化】なぜタコには『軟甲』すらなくなったの？**
   「大問4で『アサリは硬い貝殻、イカは体内の薄い軟甲をもつ』と学んだね。では、同じ軟体動物の『タコ』は、イカと違って軟甲すら完全に失っているんだ。タコのくらし方（獲物のとり方や隠れ方）を考えると、硬いものが体内にないことでどんなメリットがあると思う？」
-  - **④【外骨格の弱点】節足動物が大きく成長するための『命がけのイベント』**
+- **④【外骨格の弱点】節足動物が大きく成長するための『命がけのイベント』**
   「大問2の昆虫やエビ・カニは、外骨格で身を守っているね。でも、外骨格は『硬くて伸びない』という弱点がある。体が大きくなるとき、彼らはこの弱点をどうやって乗り越えている？また、そのときに一番危険になるのはなぜだろう？」
 - **⑤【古生物学者ミッション】新発見の化石から生き方を復元せよ！**
   「ある地層から、次のような特徴をもつ未知の動物の化石が見つかったとしよう。
@@ -473,9 +473,9 @@ const PromptCard = ({ prompt }) => {
   const promptText = prompt.defaultText || '';
   
   const timerRef = useRef(null);
-  const textareaId = useId();
+  // React 17以前の環境でもクラッシュしないよう、useId()ではなく確定IDを使用
+  const textareaId = `prompt-textarea-${prompt.id}`;
 
-  // コンポーネント破棄時にタイマーをクリアしてメモリリークを防ぐ
   useEffect(() => {
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
@@ -486,32 +486,34 @@ const PromptCard = ({ prompt }) => {
     if (!promptText) return; 
     setCopyError(false);
 
-    // 1. 最新のクリップボードAPIを試行（HTTPS環境用）
     if (navigator.clipboard && window.isSecureContext) {
       navigator.clipboard.writeText(promptText).then(() => {
         showSuccess();
       }).catch(err => {
-        console.error('クリップボードAPIでのコピーに失敗しました', err);
+        console.warn('Clipboard API failed, trying fallback:', err);
         fallbackCopyTextToClipboard(promptText);
       });
     } else {
-      // 2. HTTP環境などの場合は代替メソッドを実行
       fallbackCopyTextToClipboard(promptText);
     }
   };
 
-  // 代替コピー手段（execCommand）
+  // 代替コピー手段（iOS Safari / 旧ブラウザ / iframe内制限の完全対策版）
   const fallbackCopyTextToClipboard = (text) => {
     try {
       const textArea = document.createElement("textarea");
       textArea.value = text;
-      // 画面をスクロールさせないためのスタイル
+      textArea.setAttribute("readonly", "");
+      textArea.style.position = "fixed";
       textArea.style.top = "0";
       textArea.style.left = "0";
-      textArea.style.position = "fixed";
+      textArea.style.opacity = "0";
+      textArea.style.pointerEvents = "none";
       document.body.appendChild(textArea);
+      
       textArea.focus();
       textArea.select();
+      textArea.setSelectionRange(0, 999999); // iOSでの選択漏れ防止
       
       const successful = document.execCommand('copy');
       document.body.removeChild(textArea);
@@ -522,7 +524,7 @@ const PromptCard = ({ prompt }) => {
         showError();
       }
     } catch (err) {
-      console.error('代替コピー処理も失敗しました', err);
+      console.error('Fallback copy failed:', err);
       showError();
     }
   };
@@ -543,7 +545,7 @@ const PromptCard = ({ prompt }) => {
     <div className="bg-white rounded-xl border border-slate-300 shadow-sm hover:shadow-md transition-shadow overflow-hidden flex flex-col h-full focus-within:ring-2 focus-within:ring-blue-400">
       <div className="p-6 flex-grow flex flex-col">
         <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 bg-slate-100 rounded-lg">
+          <div className="p-2 bg-slate-100 rounded-lg shrink-0">
             {prompt.icon}
           </div>
           <h3 className="text-xl font-bold text-slate-900 leading-tight">
@@ -556,7 +558,7 @@ const PromptCard = ({ prompt }) => {
         <div className="flex flex-col flex-grow relative group">
           <label 
             htmlFor={textareaId}
-            className="absolute -top-3 left-3 bg-white px-2 text-sm font-bold text-slate-600 z-10"
+            className="absolute -top-3 left-3 bg-white px-2 text-sm font-bold text-slate-600 z-10 rounded"
           >
             プロンプト本文
           </label>
@@ -566,11 +568,12 @@ const PromptCard = ({ prompt }) => {
             value={promptText}
             readOnly
             aria-label={`${prompt.title}のプロンプト本文`}
-          ></textarea>
+          />
         </div>
       </div>
       <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 mt-auto">
         <button
+          type="button"
           onClick={handleCopy}
           disabled={!promptText}
           aria-live="polite"
@@ -586,17 +589,17 @@ const PromptCard = ({ prompt }) => {
         >
           {copyError ? (
             <>
-              <XCircle className="w-5 h-5" />
+              <XCircle className="w-5 h-5 shrink-0" />
               <span>コピーに失敗しました</span>
             </>
           ) : copied ? (
             <>
-              <Check className="w-5 h-5" />
+              <Check className="w-5 h-5 shrink-0" />
               <span>コピーしました！</span>
             </>
           ) : (
             <>
-              <Copy className="w-5 h-5" />
+              <Copy className="w-5 h-5 shrink-0" />
               <span>プロンプトをコピーする</span>
             </>
           )}
@@ -607,7 +610,6 @@ const PromptCard = ({ prompt }) => {
 };
 
 export default function App() {
-  // UDフォント（ユニバーサルデザインフォント）を優先的に適用するスタイル
   const udFontFamily = {
     fontFamily: '"BIZ UDPGothic", "UD Shin Go", "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif'
   };
@@ -621,7 +623,7 @@ export default function App() {
             生徒対話用AIプロンプト一覧
           </h1>
           <p className="text-blue-50 max-w-2xl mx-auto text-base md:text-lg leading-relaxed font-medium">
-            理科の授業や自学自習で活用できる、生徒の思考力と主体性を引き出すための教育用AIプロンプト集です。
+            理科の授業や自学自習で活用できる、生徒の思考力と主体性を引き出すための教育用AIプロンプト集です。<br className="hidden sm:inline" />
             カードの「コピーする」ボタンを押すと、すぐに貼り付けて使える形式でコピーされます。
           </p>
         </div>
