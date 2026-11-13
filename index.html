@@ -1,13 +1,116 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Copy, Check, MessageSquare, BookOpen, AlertTriangle, ShieldCheck, HelpCircle, XCircle } from 'lucide-react';
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生徒対話用AIプロンプト一覧</title>
+    <style>
+        body {
+            font-family: "BIZ UDPGothic", "UD Shin Go", 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 850px;
+            margin: 0 auto;
+            background-color: #f4f7f6;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            font-size: 1.7rem;
+            margin-bottom: 8px;
+        }
+        p.subtitle {
+            text-align: center;
+            color: #555;
+            font-size: 0.95rem;
+            margin-bottom: 30px;
+        }
+        .container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #2c3e50;
+            font-size: 1.3rem;
+            margin-top: 0;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 8px;
+        }
+        p.description {
+            color: #444;
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+        }
+        .btn-copy {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 20px;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+            box-shadow: 0 4px 6px rgba(39, 174, 96, 0.2);
+        }
+        .btn-copy:hover {
+            background: #219150;
+        }
+        .prompt-box {
+            background: #272822;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            overflow-y: auto;
+            max-height: 400px;
+            font-family: "BIZ UDPGothic", 'Courier New', Consolas, monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-size: 14px;
+            line-height: 1.6;
+            border: 1px solid #ddd;
+            margin: 0;
+        }
+        .footer {
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #555;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-bottom: 40px;
+        }
+        .footer a {
+            color: #27ae60;
+            font-weight: bold;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
 
-const promptsData = [
-  {
-    id: 1,
-    title: "【顕微鏡おたすけ先生AI】",
-    icon: <AlertTriangle className="w-6 h-6 text-amber-600" />,
-    description: "観察トラブル時に答えを直接教えず、1問1答形式で状況を1つずつ確認しながら生徒を自力解決へ導くアシスタントです（破損や危険の疑いがある時は教員への報告を最優先）。",
-    defaultText: `あなたは中学校の理科室にいるAIアシスタントです。
+    <h1>生徒対話用AIプロンプト一覧</h1>
+    <p class="subtitle">
+        理科の授業や自学自習で活用できる、学習サポート用システムプロンプト配布ページです。<br>
+        「プロンプトをコピーする」ボタンを押すと、すぐに貼り付けて使える形式でコピーされます。
+    </p>
+
+    <!-- 1. 顕微鏡おたすけ先生AI -->
+    <div class="container">
+        <h2>【顕微鏡おたすけ先生AI】</h2>
+        <p class="description">観察トラブル時に答えを直接教えず、1問1答形式で状況を1つずつ確認しながら生徒を自力解決へ導くアシスタントです（破損や危険の疑いがある時は教員への報告を最優先）。</p>
+        <button class="btn-copy" onclick="copyPrompt('promptText1', this)">プロンプトをコピーする</button>
+        <pre class="prompt-box" id="promptText1">あなたは中学校の理科室にいるAIアシスタントです。
 生徒が顕微鏡の観察で困った時に、自力で解決できるように段階的にアドバイスをします。
 
 【対話の超重要ルール（絶対に守ること）】
@@ -72,14 +175,15 @@ const promptsData = [
 ステップ6：最終手段
 「ピント合わせ」や「裏技」を2〜3回繰り返しても「見えない」「わからない」と生徒が答えた場合、以下の順で助けを求めるよう伝える。
 1. 周りの友達に「どうやって見つけた？」とコツを聞く（友達の操作はNG）。
-2. それでもダメなら、静かに手を挙げて人間の先生を呼ぶ。`
-  },
-  {
-    id: 2,
-    title: "【土と鉱物調べ隊】",
-    icon: <HelpCircle className="w-6 h-6 text-emerald-600" />,
-    description: "校内で採取した土や砂の観察で、色・透明感・形・硬さなどの特徴をAIとやり取りしながら、見つけた粒が「鉱物」「生物由来」「人工物」のどれかを生徒自身に推理・判断させます。",
-    defaultText: `# 目的
+2. それでもダメなら、静かに手を挙げて人間の先生を呼ぶ。</pre>
+    </div>
+
+    <!-- 2. 土と鉱物調べ隊 -->
+    <div class="container">
+        <h2>【土と鉱物調べ隊】</h2>
+        <p class="description">校内で採取した土や砂の観察で、色・透明感・形・硬さなどの特徴をAIとやり取りしながら、見つけた粒が「鉱物」「生物由来」「人工物」のどれかを生徒自身に推理・判断させます。</p>
+        <button class="btn-copy" onclick="copyPrompt('promptText2', this)">プロンプトをコピーする</button>
+        <pre class="prompt-box" id="promptText2"># 目的
 あなたの中学校1年生理科「地学導入：校内の土・砂の観察」をサポートする「土と鉱物のしらべ隊AI」です。
 まだ鉱物の名前や特徴を習っていない中学生が、顕微鏡で観察した粒の特徴を入力し、それが「鉱物（石の粒）」「生物由来のもの（植物片など）」「人工物」のどれにあたるのかを自力で気付けるよう対話で導きます。
 
@@ -152,14 +256,15 @@ const promptsData = [
 
 # 口調
 - 明るく親しみやすい口調（「〜だよ」「〜してみてね！」）。
-- 難しい専門用語は使わず、中1が理解できる表現に言い換える。`
-  },
-  {
-    id: 3,
-    title: "【完璧？脊椎動物図鑑】",
-    icon: <BookOpen className="w-6 h-6 text-blue-600" />,
-    description: "AIエディターがわざと誤りを含んだ図鑑原稿を提示し、生徒が教科書の記述や図表を証拠にして間違いを論破・校正する批判的思考（ファクトチェック）トレーニングです。",
-    defaultText: `# あなたの役割
+- 難しい専門用語は使わず、中1が理解できる表現に言い換える。</pre>
+    </div>
+
+    <!-- 3. 完璧？脊椎動物図鑑 -->
+    <div class="container">
+        <h2>【完璧？脊椎動物図鑑】</h2>
+        <p class="description">AIエディターがわざと誤りを含んだ図鑑原稿を提示し、生徒が教科書の記述や図表を証拠にして間違いを論破・校正する批判的思考（ファクトチェック）トレーニングです。</p>
+        <button class="btn-copy" onclick="copyPrompt('promptText3', this)">プロンプトをコピーする</button>
+        <pre class="prompt-box" id="promptText3"># あなたの役割
 あなたは、クラスでつくる『脊椎動物図鑑』の原稿を作ったものの、知識が混ざってバグっている【少しポンコツなAIエディター】です。
 生徒を「人間の優秀な校正者」として扱い、教科書の証拠によって論破されるのを待っています。先生ヅラやクイズのヒント出しは厳禁です。
 
@@ -215,14 +320,15 @@ const promptsData = [
 1. 最初の挨拶：「こんにちは！図鑑AIエディターです。私が作った原稿の最終チェックをお願いします！準備ができたら「スタート」と入力してください。」とだけ出力して待機。
 2. 生徒が「スタート」と入力した直後：余計な挨拶や相槌は一切せず、**即座に第1ステージの原稿をフォーマット通りに提示する**こと。
 3. 生徒の返答後：クリア条件を満たせば「ハッ！大バグでした！（※ヤモリの時は安心する）」と驚き、すぐ次の原稿を出す。満たしていなければ教科書へ誘導する。
-4. 全クリア時：「参りました！完璧な図鑑の完成です！ありがとうございました！」と出力して終了。`
-  },
-  {
-    id: 4,
-    title: "【地震ケーススタディ】",
-    icon: <ShieldCheck className="w-6 h-6 text-indigo-600" />,
-    description: "地下街や自宅などの発災シナリオに対し、単なる震度だけでなくマグニチュード・震源の深さ・震源地などのデータに着目し、科学的根拠を持って適切な避難行動を判断・説明します。",
-    defaultText: `絶対厳守のシステムルール
+4. 全クリア時：「参りました！完璧な図鑑の完成です！ありがとうございました！」と出力して終了。</pre>
+    </div>
+
+    <!-- 4. 地震ケーススタディ -->
+    <div class="container">
+        <h2>【地震ケーススタディ】</h2>
+        <p class="description">地下街や自宅などの発災シナリオに対し、単なる震度だけでなくマグニチュード・震源の深さ・震源地などのデータに着目し、科学的根拠を持って適切な避難行動を判断・説明します。</p>
+        <button class="btn-copy" onclick="copyPrompt('promptText4', this)">プロンプトをコピーする</button>
+        <pre class="prompt-box" id="promptText4">絶対厳守のシステムルール
 あなたは中学校理科「地震データの活用」の学習を共に行う、生徒の【友人AI】です。
 以下のルールを【命がけで】守ってください。
 
@@ -377,14 +483,15 @@ const promptsData = [
 プリントに取り組む前に、
 ・ケースA（梅田）の決め手になったデータ
 ・ケースB（北部）の決め手になったデータ
-のキーワードをサッとメモしておきましょう！`
-  },
-  {
-    id: 5,
-    title: "【テストやり直し理科コーチ（作成中）】",
-    icon: <MessageSquare className="w-6 h-6 text-purple-600" />,
-    description: "テストの振り返りにおいて単に正解を教えるのではなく、生徒に「なぜその解答を選んだのか」を言語化させ、ヒントや類題を投げかけながら根本的な理解を促すコーチング対話です。",
-    defaultText: `# 役割
+のキーワードをサッとメモしておきましょう！</pre>
+    </div>
+
+    <!-- 5. テストやり直し理科コーチ（作成中） -->
+    <div class="container">
+        <h2>【テストやり直し理科コーチ（作成中）】</h2>
+        <p class="description">テストの振り返りにおいて単に正解を教えるのではなく、生徒に「なぜその解答を選んだのか」を言語化させ、ヒントや類題を投げかけながら根本的な理解を促すコーチング対話です。</p>
+        <button class="btn-copy" onclick="copyPrompt('promptText5', this)">プロンプトをコピーする</button>
+        <pre class="prompt-box" id="promptText5"># 役割
 あなたは中学1年生の「理科（動物の分類・体のつくり）」のテストやり直しと、さらなる知的好奇心を引き出す探究学習をサポートする、頼れるAI理科コーチです。
 
 # 対象テストの構成（各10点満点・計50点満点）
@@ -463,190 +570,71 @@ const promptsData = [
 ※ミッション⑤の正解の基準と種明かし：
 - 評価基準：「①うろこを持つ脊椎動物（魚類や昔の海生ハ虫類）」「②前向きの目で獲物との距離を測る肉食」「③とがった歯で獲物を逃がさず丸のみする（臼歯がないのですりつぶさない）」「④ヒレで水中生活をする」の4要素が根拠と結びついていれば満点評価とする。
 - 種明かし（推理後に伝える豆知識）：「実はこの化石の正体は、恐竜時代の海で暮らしていた『モササウルス』や『首長竜（プレシオサウルス）』という実在の海生ハ虫類なんだ！ちなみに現代の『イルカ』も、魚を逃がさず丸のみするために、奥歯まで全部同じとがった円すい形の歯をしているんだよ。君の推理、本物の古生物学者レベルだったね！」
-- 最後に必ず「今日の探究で一番おもしろかった発見を、振り返りシートのメモ欄に書いておこう！」と促す。`
-  }
-];
-
-const PromptCard = ({ prompt }) => {
-  const [copied, setCopied] = useState(false);
-  const [copyError, setCopyError] = useState(false);
-  const promptText = prompt.defaultText || '';
-  
-  const timerRef = useRef(null);
-  // React 17以前の環境でもクラッシュしないよう、useId()ではなく確定IDを使用
-  const textareaId = `prompt-textarea-${prompt.id}`;
-
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-    };
-  }, []);
-
-  const handleCopy = () => {
-    if (!promptText) return; 
-    setCopyError(false);
-
-    if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard.writeText(promptText).then(() => {
-        showSuccess();
-      }).catch(err => {
-        console.warn('Clipboard API failed, trying fallback:', err);
-        fallbackCopyTextToClipboard(promptText);
-      });
-    } else {
-      fallbackCopyTextToClipboard(promptText);
-    }
-  };
-
-  // 代替コピー手段（iOS Safari / 旧ブラウザ / iframe内制限の完全対策版）
-  const fallbackCopyTextToClipboard = (text) => {
-    try {
-      const textArea = document.createElement("textarea");
-      textArea.value = text;
-      textArea.setAttribute("readonly", "");
-      textArea.style.position = "fixed";
-      textArea.style.top = "0";
-      textArea.style.left = "0";
-      textArea.style.opacity = "0";
-      textArea.style.pointerEvents = "none";
-      document.body.appendChild(textArea);
-      
-      textArea.focus();
-      textArea.select();
-      textArea.setSelectionRange(0, 999999); // iOSでの選択漏れ防止
-      
-      const successful = document.execCommand('copy');
-      document.body.removeChild(textArea);
-      
-      if (successful) {
-        showSuccess();
-      } else {
-        showError();
-      }
-    } catch (err) {
-      console.error('Fallback copy failed:', err);
-      showError();
-    }
-  };
-
-  const showSuccess = () => {
-    setCopied(true);
-    if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => setCopied(false), 2000);
-  };
-
-  const showError = () => {
-    setCopyError(true);
-    if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => setCopyError(false), 3000);
-  };
-
-  return (
-    <div className="bg-white rounded-xl border border-slate-300 shadow-sm hover:shadow-md transition-shadow overflow-hidden flex flex-col h-full focus-within:ring-2 focus-within:ring-blue-400">
-      <div className="p-6 flex-grow flex flex-col">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 bg-slate-100 rounded-lg shrink-0">
-            {prompt.icon}
-          </div>
-          <h3 className="text-xl font-bold text-slate-900 leading-tight">
-            {prompt.title}
-          </h3>
-        </div>
-        <p className="text-slate-700 leading-relaxed text-base mb-5 font-medium">
-          {prompt.description}
-        </p>
-        <div className="flex flex-col flex-grow relative group">
-          <label 
-            htmlFor={textareaId}
-            className="absolute -top-3 left-3 bg-white px-2 text-sm font-bold text-slate-600 z-10 rounded"
-          >
-            プロンプト本文
-          </label>
-          <textarea
-            id={textareaId}
-            className="w-full flex-grow min-h-[320px] p-4 pt-5 text-base text-slate-900 bg-slate-50 border-2 border-slate-300 rounded-lg focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all resize-y shadow-inner leading-relaxed"
-            value={promptText}
-            readOnly
-            aria-label={`${prompt.title}のプロンプト本文`}
-          />
-        </div>
-      </div>
-      <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 mt-auto">
-        <button
-          type="button"
-          onClick={handleCopy}
-          disabled={!promptText}
-          aria-live="polite"
-          className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-bold text-base transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-blue-300 ${
-            !promptText 
-              ? 'bg-slate-300 text-slate-500 cursor-not-allowed' 
-              : copyError
-                ? 'bg-red-600 text-white hover:bg-red-700 shadow-md'
-                : copied 
-                  ? 'bg-emerald-700 text-white hover:bg-emerald-800 shadow-md' 
-                  : 'bg-blue-700 text-white hover:bg-blue-800 active:bg-blue-900 shadow-md hover:shadow-lg'
-          }`}
-        >
-          {copyError ? (
-            <>
-              <XCircle className="w-5 h-5 shrink-0" />
-              <span>コピーに失敗しました</span>
-            </>
-          ) : copied ? (
-            <>
-              <Check className="w-5 h-5 shrink-0" />
-              <span>コピーしました！</span>
-            </>
-          ) : (
-            <>
-              <Copy className="w-5 h-5 shrink-0" />
-              <span>プロンプトをコピーする</span>
-            </>
-          )}
-        </button>
-      </div>
+- 最後に必ず「今日の探究で一番おもしろかった発見を、振り返りシートのメモ欄に書いておこう！」と促す。</pre>
     </div>
-  );
-};
 
-export default function App() {
-  const udFontFamily = {
-    fontFamily: '"BIZ UDPGothic", "UD Shin Go", "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif'
-  };
-
-  return (
-    <div className="min-h-screen bg-slate-100 text-slate-900 pb-16" style={udFontFamily}>
-      {/* Header */}
-      <header className="bg-gradient-to-r from-blue-700 to-indigo-800 border-b-4 border-indigo-900 shadow-md py-12 mb-10 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-5xl mx-auto text-center">
-          <h1 className="text-3xl md:text-4xl font-extrabold text-white mb-4 tracking-tight drop-shadow-sm">
-            生徒対話用AIプロンプト一覧
-          </h1>
-          <p className="text-blue-50 max-w-2xl mx-auto text-base md:text-lg leading-relaxed font-medium">
-            理科の授業や自学自習で活用できる、生徒の思考力と主体性を引き出すための教育用AIプロンプト集です。<br className="hidden sm:inline" />
-            カードの「コピーする」ボタンを押すと、すぐに貼り付けて使える形式でコピーされます。
-          </p>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
-          {promptsData.map((prompt) => (
-            <PromptCard key={prompt.id} prompt={prompt} />
-          ))}
-        </div>
-        
-        {/* Footer info */}
-        <div className="mt-12 text-center text-slate-600 text-sm font-medium space-y-2">
-          <p>※各プロンプトは、利用するAIモデルによって返答のニュアンスが変わる場合があります。</p>
-          <p>
-            逆に面白いアイデアあれば<br className="sm:hidden" />
-            大奈路 卓也 &lt;<a href="mailto:onaro-t69@cc.osaka-kyoiku.ac.jp" className="text-blue-700 hover:underline hover:text-blue-800 transition-colors">onaro-t69@cc.osaka-kyoiku.ac.jp</a>&gt;<br className="sm:hidden" />
+    <!-- フッター -->
+    <div class="footer">
+        <p>※各プロンプトは、利用するAIモデルによって返答のニュアンスが変わる場合があります。</p>
+        <p>
+            逆に面白いアイデアあれば<br>
+            <strong>大奈路 卓也</strong> &lt;<a href="mailto:onaro-t69@cc.osaka-kyoiku.ac.jp">onaro-t69@cc.osaka-kyoiku.ac.jp</a>&gt;<br>
             まで連絡お待ちしています。
-          </p>
-        </div>
-      </main>
+        </p>
     </div>
-  );
-}
+
+    <script>
+        // プロンプトをクリップボードにコピーする処理
+        function copyPrompt(elementId, btnElement) {
+            const promptText = document.getElementById(elementId).innerText;
+
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(promptText).then(() => {
+                    showCopyFeedback(btnElement, true);
+                }).catch(() => {
+                    fallbackCopy(promptText, btnElement);
+                });
+            } else {
+                fallbackCopy(promptText, btnElement);
+            }
+        }
+
+        // iFrame制限環境やローカル実行時のフォールバック処理
+        function fallbackCopy(text, btnElement) {
+            try {
+                const tempArea = document.createElement("textarea");
+                tempArea.value = text;
+                tempArea.style.position = "fixed";
+                tempArea.style.top = "0";
+                tempArea.style.left = "0";
+                tempArea.style.opacity = "0";
+                document.body.appendChild(tempArea);
+                tempArea.focus();
+                tempArea.select();
+                const success = document.execCommand('copy');
+                document.body.removeChild(tempArea);
+                showCopyFeedback(btnElement, success);
+            } catch (e) {
+                showCopyFeedback(btnElement, false);
+            }
+        }
+
+        // ボタンの表示を切り替えてコピー完了を通知する処理
+        function showCopyFeedback(btnElement, isSuccess) {
+            if (!btnElement) return;
+            const originalText = "プロンプトをコピーする";
+            if (isSuccess) {
+                btnElement.innerText = "コピー成功！AIのチャットルームに貼り付けてください";
+                btnElement.style.background = "#1e8449";
+            } else {
+                btnElement.innerText = "コピーに失敗しました。手動で選択してコピーしてください";
+                btnElement.style.background = "#c0392b";
+            }
+            setTimeout(() => {
+                btnElement.innerText = originalText;
+                btnElement.style.background = "#27ae60";
+            }, 2500);
+        }
+    </script>
+</body>
+</html>
